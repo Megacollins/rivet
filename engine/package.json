@@ -1,0 +1,31 @@
+{
+  "name": "@rivet/engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./registry": "./src/chain/registry.ts",
+    "./config": "./src/chain/config.ts",
+    "./canonical": "./src/report/canonical.ts",
+    "./types": "./src/types.ts",
+    "./report": "./src/report/report.ts"
+  },
+  "scripts": {
+    "test": "node --test test/engine.test.ts",
+    "test:live": "node --test test/live.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@cosmjs/stargate": "0.39.0",
+    "@noble/hashes": "2.4.0",
+    "@noble/post-quantum": "0.7.1",
+    "@qorechain/sdk": "0.14.0",
+    "@scure/base": "1.2.6",
+    "viem": "2.58.4"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.1",
+    "typescript": "5.9.3"
+  }
+}

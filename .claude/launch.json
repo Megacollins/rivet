@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "rivet-web",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["-w", "web", "run", "dev"],
+      "port": 3480
+    }
+  ]
+}

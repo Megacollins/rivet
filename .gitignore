@@ -1,0 +1,11 @@
+node_modules/
+.env
+.env.*
+!.env.example
+reports/*.json
+!reports/examples/
+contracts/out/
+contracts/cache/
+contracts/broadcast/*/31337/
+.next/
+*.pem
