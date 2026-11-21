@@ -9,7 +9,8 @@ const nextConfig: NextConfig = {
   turbopack: { root },
   outputFileTracingRoot: root,
   // Committed reference reports, read at runtime by the API routes on a read-only host.
-  outputFileTracingIncludes: { '/api/**': ['../reports/examples/*.json'] },
+  // noble's package.json is read at runtime so reports record the real installed version.
+  outputFileTracingIncludes: { '/api/**': ['../reports/examples/*.json', '../node_modules/@noble/post-quantum/package.json'] },
   poweredByHeader: false,
 };
 

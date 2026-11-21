@@ -1,0 +1,15 @@
+# Never upload secrets or local artefacts to Vercel.
+.env
+.env.*
+!.env.example
+*.pem
+.git
+.claude
+node_modules
+**/node_modules
+web/.next
+reports/*.json
+contracts/out
+contracts/cache
+contracts/broadcast
+contracts/lib

@@ -9,3 +9,5 @@ contracts/cache/
 contracts/broadcast/*/31337/
 .next/
 *.pem
+
+.vercel
