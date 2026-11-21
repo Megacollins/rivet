@@ -5,7 +5,7 @@ import { useMemo, useState } from 'react';
 import type { Report } from '@rivet/engine/report';
 import { DIANA } from '@rivet/engine/config';
 import { useJson } from '@/lib/client/useJson';
-import type { RegistryResponse, StatusResponse } from '@/lib/client/types';
+import type { OverviewResponse, RegistryResponse } from '@/lib/client/types';
 import { InteropMatrix } from '@/components/InteropMatrix';
 import { ResultsTable } from '@/components/ResultsTable';
 import { Callout, Hash, PageHeader, Spinner, StatusBadge, SummaryBar } from '@/components/ui';
@@ -14,7 +14,7 @@ import { canonicalReportHash } from '@/lib/client/hash';
 export function ReportView({ id }: { id: string }) {
   const { data: report, error } = useJson<Report>(`/api/reports/${id}`);
   const { data: reg, reload } = useJson<RegistryResponse>('/api/registry');
-  const { data: status } = useJson<StatusResponse>('/api/status');
+  const { data: status } = useJson<OverviewResponse>('/api/status/overview');
   const hash = useMemo(() => (report ? canonicalReportHash(report) : undefined), [report]);
   const onchain = reg?.reports.find((r) => r.reportHash === hash);
   const [pub, setPub] = useState<{ busy: boolean; error?: string; tx?: string }>({ busy: false });
