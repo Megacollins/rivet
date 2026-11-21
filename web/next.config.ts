@@ -8,6 +8,8 @@ const nextConfig: NextConfig = {
   transpilePackages: ['@rivet/engine'],
   turbopack: { root },
   outputFileTracingRoot: root,
+  // Committed reference reports, read at runtime by the API routes on a read-only host.
+  outputFileTracingIncludes: { '/api/**': ['../reports/examples/*.json'] },
   poweredByHeader: false,
 };
 
