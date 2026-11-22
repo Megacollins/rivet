@@ -30,7 +30,7 @@ export function Dashboard() {
       </PageHeader>
 
       <div className="space-y-5">
-        <div className="grid gap-4 lg:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           <ChainCard q={chain} />
           <RegistryCard q={registry} />
           <LatestCard q={overview} />
@@ -150,7 +150,7 @@ function RegistryCard({ q }: { q: Q<RegistryStatus> }) {
 function LatestCard({ q }: { q: Q<OverviewResponse> }) {
   const l = q.data?.latestReport;
   return (
-    <div className="card card-pad">
+    <div className="card card-pad md:col-span-2 xl:col-span-1">
       <div className="label">Latest report</div>
       {q.error && <div className="mt-3 text-sm text-fail-soft">{q.error}</div>}
       {!q.data && !q.error && <Skeleton rows={2} />}
@@ -188,7 +188,7 @@ function ImplementationsCard({ overview, chain }: { overview: Q<OverviewResponse
         <div className="mt-1 text-sm text-fg-muted">Detected on this server. Unavailable ones are reported as unsupported, never simulated.</div>
       </div>
       {overview.error && <Callout tone="fail">{overview.error}</Callout>}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {!overview.data && !overview.error && Array.from({ length: 6 }, (_, i) => (
           <div key={i} className="h-[92px] animate-pulse rounded-lg border border-ink-700 bg-ink-850/60" />
         ))}

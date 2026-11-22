@@ -31,7 +31,31 @@ export function InteropMatrix({ report }: { report: Report }) {
         </div>
       </div>
       <p className="mb-4 text-sm text-fg-muted">Rows sign, columns verify. Each dot is one vector: {vectors.join(', ')}.</p>
-      <div className="overflow-x-auto">
+      {/* Below sm: one block per signer, verifiers as rows. sm and up: the full grid. */}
+      <div className="space-y-3 sm:hidden">
+        {signerKeys.map((sk) => {
+          const [signer, mode] = sk.split('.');
+          return (
+            <div key={sk} className="rounded-lg border border-ink-700 bg-ink-850 p-3">
+              <div className="text-sm text-fg">{name(signer!)} <span className="text-xs text-fg-dim">· {mode}</span></div>
+              <ul className="mt-2 space-y-1.5">
+                {verifiers.map((v) => (
+                  <li key={v} className="flex items-center justify-between gap-3 text-xs">
+                    <span className="min-w-0 truncate text-fg-muted">{name(v)}</span>
+                    <span className="flex shrink-0 gap-1.5">
+                      {cell(sk, v).map((r, i) => (
+                        <span key={i} title={r ? `${vectors[i]}: ${r.status}${r.detail ? ` — ${r.detail}` : ''}` : `${vectors[i]}: not run`}
+                          className={`h-2.5 w-2.5 rounded-full ${r ? DOT[r.status] : 'bg-ink-600'}`} />
+                      ))}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        })}
+      </div>
+      <div className="hidden overflow-x-auto sm:block">
         <table className="w-full min-w-[560px] border-separate border-spacing-1.5 text-sm">
           <thead>
             <tr>

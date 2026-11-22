@@ -47,7 +47,7 @@ export function ReportView({ id }: { id: string }) {
       </PageHeader>
 
       <div className="space-y-5">
-        <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+        <div className="grid gap-4 xl:grid-cols-[1.4fr_1fr]">
           <div className="card card-pad">
             <div className="label">Summary</div>
             <div className="mt-3 flex flex-wrap items-baseline gap-x-6 gap-y-2">
@@ -71,12 +71,12 @@ export function ReportView({ id }: { id: string }) {
           <div className="card card-pad">
             <div className="label">Identity & attestation</div>
             <dl className="mt-3 space-y-2.5 text-sm">
-              <div className="flex justify-between gap-3"><dt className="text-fg-dim">Report hash</dt><dd><Hash value={hash} /></dd></div>
-              <div className="flex justify-between gap-3"><dt className="text-fg-dim">Network</dt><dd className="text-right text-fg-muted">{report.network.name}<div className="mono text-fg-dim">EVM {report.network.evmChainId}</div></dd></div>
-              <div className="flex justify-between gap-3"><dt className="text-fg-dim">Pinned block</dt><dd className="mono">{report.network.blockNumber
+              <div className="flex flex-col gap-0.5 min-[420px]:flex-row min-[420px]:justify-between min-[420px]:gap-3"><dt className="text-fg-dim">Report hash</dt><dd><Hash value={hash} /></dd></div>
+              <div className="flex flex-col gap-0.5 min-[420px]:flex-row min-[420px]:justify-between min-[420px]:gap-3"><dt className="text-fg-dim">Network</dt><dd className="text-fg-muted min-[420px]:text-right">{report.network.name}<div className="mono text-fg-dim">EVM {report.network.evmChainId}</div></dd></div>
+              <div className="flex flex-col gap-0.5 min-[420px]:flex-row min-[420px]:justify-between min-[420px]:gap-3"><dt className="text-fg-dim">Pinned block</dt><dd className="mono">{report.network.blockNumber
                 ? <a className="link" href={`${DIANA.explorer}/block/${report.network.blockNumber}`} target="_blank" rel="noreferrer">{report.network.blockNumber}</a>
                 : <span className="text-fg-dim">offline run</span>}</dd></div>
-              <div className="flex justify-between gap-3"><dt className="text-fg-dim">On-chain</dt><dd>{onchain
+              <div className="flex flex-col gap-0.5 min-[420px]:flex-row min-[420px]:justify-between min-[420px]:gap-3"><dt className="text-fg-dim">On-chain</dt><dd>{onchain
                 ? <Link className="link" href={`/registry#report-${onchain.id}`}>Report #{onchain.id}{onchain.revoked ? ' (revoked)' : ''}</Link>
                 : <span className="text-fg-dim">not published</span>}</dd></div>
             </dl>
@@ -99,7 +99,7 @@ export function ReportView({ id }: { id: string }) {
 
         <div className="card card-pad">
           <div className="label mb-3">Implementations</div>
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
             {report.implementations.map((i) => (
               <div key={i.id} className="flex items-start justify-between gap-2 rounded-lg bg-ink-850 px-3 py-2.5 text-sm">
                 <div>
