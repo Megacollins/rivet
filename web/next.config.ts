@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
   // noble's package.json is read at runtime so reports record the real installed version.
   outputFileTracingIncludes: { '/api/**': ['../reports/examples/*.json', '../node_modules/@noble/post-quantum/package.json'] },
   poweredByHeader: false,
+  devIndicators: false,
 };
 
 export default nextConfig;

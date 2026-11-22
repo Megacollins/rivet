@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { DIANA } from '@rivet/engine/config';
 import { useJson } from '@/lib/client/useJson';
 import type { OnchainReport, RegistryResponse } from '@/lib/client/types';
@@ -10,6 +10,9 @@ import { Callout, Hash, PageHeader, Spinner, SummaryBar } from '@/components/ui'
 
 export default function Registry() {
   const { data, error, loading, reload } = useJson<RegistryResponse>('/api/registry');
+  // `/registry?verify=1` starts the in-browser verification of report #1 on arrival (linked from the landing page).
+  const [autoVerify, setAutoVerify] = useState<string | null>(null);
+  useEffect(() => { setAutoVerify(new URLSearchParams(window.location.search).get('verify')); }, []);
   return (
     <>
       <PageHeader eyebrow="On-chain registry" title="Attested reports on Diana"
@@ -29,13 +32,13 @@ export default function Registry() {
       )}
       {data?.reports.length === 0 && data.configured && <Callout>No reports have been published yet.</Callout>}
       <div className="space-y-4">
-        {data?.address && data.reports.map((r) => <ReportCard key={r.id} r={r} registry={data.address as `0x${string}`} />)}
+        {data?.address && data.reports.map((r) => <ReportCard key={r.id} r={r} registry={data.address as `0x${string}`} autoStart={autoVerify === r.id} />)}
       </div>
     </>
   );
 }
 
-function ReportCard({ r, registry }: { r: OnchainReport; registry: `0x${string}` }) {
+function ReportCard({ r, registry, autoStart }: { r: OnchainReport; registry: `0x${string}`; autoStart?: boolean }) {
   const [steps, setSteps] = useState<Step[]>([]);
   const [state, setState] = useState<'idle' | 'running' | 'ok' | 'fail'>('idle');
   const [err, setErr] = useState<string>();
@@ -57,6 +60,16 @@ function ReportCard({ r, registry }: { r: OnchainReport; registry: `0x${string}`
       setErr((e as Error).message.split('\n')[0]); setState('fail');
     }
   };
+
+  const started = useRef(false);
+  useEffect(() => {
+    if (autoStart && !started.current) {
+      started.current = true;
+      document.getElementById(`report-${r.id}`)?.scrollIntoView({ block: 'start' });
+      void run();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoStart]);
 
   return (
     <div id={`report-${r.id}`} className="card card-pad scroll-mt-6">

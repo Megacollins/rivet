@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { Logo } from './Logo';
 
 const NAV = [
-  { href: '/', label: 'Dashboard', icon: 'M3 12l9-8 9 8M5 10v10h5v-6h4v6h5V10' },
+  { href: '/dashboard', label: 'Dashboard', icon: 'M3 12l9-8 9 8M5 10v10h5v-6h4v6h5V10' },
   { href: '/test-lab', label: 'Test Lab', icon: 'M9 3h6M10 3v6L4.5 18.5A1.7 1.7 0 006 21h12a1.7 1.7 0 001.5-2.5L14 9V3M7 15h10' },
   { href: '/attack-lab', label: 'Attack Lab', icon: 'M12 3l8 4v5c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V7l8-4zM9.5 9.5l5 5M14.5 9.5l-5 5' },
   { href: '/reports', label: 'Reports', icon: 'M7 3h7l5 5v13H7zM14 3v5h5M10 13h6M10 17h6' },
@@ -17,7 +17,7 @@ const NAV = [
 export function Sidebar() {
   const path = usePathname();
   const [open, setOpen] = useState(false);
-  const active = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
+  const active = (href: string) => path.startsWith(href);
 
   return (
     <aside className="border-b border-ink-700 bg-ink-900/70 backdrop-blur md:sticky md:top-0 md:h-screen md:w-64 md:shrink-0 md:border-b-0 md:border-r">
