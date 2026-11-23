@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { useJson } from '@/lib/client/useJson';
+import type { OverviewResponse } from '@/lib/client/types';
 import { Callout, Hash, Spinner, Verdict } from './ui';
 
 type Tamper = 'none' | 'message' | 'signature' | 'key' | 'truncate';
@@ -33,11 +35,15 @@ export function Playground({ explorer, defaultTamper = 'none', title = 'Sign you
   const [busy, setBusy] = useState(false);
   const [res, setRes] = useState<Result | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  // This server's real capabilities: OpenSSL can only sign deterministically where its >= 3.5 CLI is installed.
+  const overview = useJson<OverviewResponse>('/api/status/overview');
+  const canDeterministic = overview.data?.implementations.find((i) => i.id === signer)?.capabilities.deterministicSign ?? true;
+  const useDeterministic = deterministic && canDeterministic;
 
   const go = async () => {
     setBusy(true); setErr(null);
     try {
-      const r = await fetch('/api/playground', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ message, encoding, signer, deterministic, tamper }) });
+      const r = await fetch('/api/playground', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ message, encoding, signer, deterministic: useDeterministic, tamper }) });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error ?? `HTTP ${r.status}`);
       setRes(j);
@@ -77,10 +83,13 @@ export function Playground({ explorer, defaultTamper = 'none', title = 'Sign you
               ))}
             </div>
           </div>
-          <label className="flex items-center gap-2 text-sm text-fg-muted">
-            <input type="checkbox" checked={deterministic} onChange={(e) => setDeterministic(e.target.checked)} className="accent-violet-glow" />
-            Deterministic signing <span className="text-xs text-fg-dim">(off = hedged)</span>
-          </label>
+          <div>
+            <label className={`flex items-center gap-2 text-sm ${canDeterministic ? 'text-fg-muted' : 'text-fg-dim'}`}>
+              <input type="checkbox" checked={useDeterministic} disabled={!canDeterministic} onChange={(e) => setDeterministic(e.target.checked)} className="accent-violet-glow" />
+              Deterministic signing <span className="text-xs text-fg-dim">(off = hedged)</span>
+            </label>
+            {!canDeterministic && <div className="mt-1 text-xs text-fg-dim">OpenSSL signs hedged only on this server (deterministic needs its 3.5+ command-line tool).</div>}
+          </div>
           <div>
             <label htmlFor="pg-tamper" className="mb-1 block text-xs text-fg-dim">Tamper after signing</label>
             <select id="pg-tamper" className="input" value={tamper} onChange={(e) => setTamper(e.target.value as Tamper)}>
