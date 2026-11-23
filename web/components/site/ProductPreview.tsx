@@ -39,7 +39,7 @@ export function ProductPreview() {
         <div className="overflow-hidden rounded-2xl border border-white/[0.08] bg-ink-900 shadow-[0_40px_120px_-40px_rgb(0_0_0/0.9),0_0_0_1px_rgb(139_92_246/0.08)]">
           <div className="flex items-center gap-2 border-b border-white/[0.06] bg-ink-850 px-4 py-2.5">
             <span className="h-2.5 w-2.5 rounded-full bg-ink-600" /><span className="h-2.5 w-2.5 rounded-full bg-ink-600" /><span className="h-2.5 w-2.5 rounded-full bg-ink-600" />
-            <span className="mono ml-3 truncate text-[11.5px] text-fg-dim">rivet-alpha-rose.vercel.app{shot.href}</span>
+            <span className="mono ml-3 truncate text-[11.5px] text-fg-dim">rivetpq.vercel.app{shot.href}</span>
           </div>
           <Link href={shot.href} className="group block" aria-label={`Open ${shot.tab}`}>
             <Image key={shot.src} src={shot.src} alt={shot.alt} width={2880} height={1800} sizes="(min-width: 1152px) 1100px, 100vw"

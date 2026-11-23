@@ -6,7 +6,7 @@ Built for QoreChain *Build Before Q-Day*, Post-Quantum dApp track, on the **Dian
 
 | | |
 |---|---|
-| **Live app** | **https://rivet-alpha-rose.vercel.app** (read-only: runs suites live, verifies attestations in your browser) |
+| **Live app** | **https://rivetpq.vercel.app** (read-only: runs suites live, verifies attestations in your browser) |
 | Source | https://github.com/Megacollins/rivet |
 | Registry (Diana) | [`0x2afd0bfb2cae5b1f3d0a96265f7b314cb514205c`](https://explore.qore.network/address/0x2afd0bfb2cae5b1f3d0a96265f7b314cb514205c) |
 | Operator / attester | `qor1tga4cqmqpnlkvpv8k8ry7cvsjareyspla69l6y` (`0x5A3B5C03600cFF660587B1c64f6190974792403F`) |

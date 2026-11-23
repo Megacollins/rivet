@@ -11,7 +11,7 @@
 | `registerAttester` tx | `0x5bd51b0437469fa44e2c411363894c7edcd35e2a2defc1675535ac0eae392cad` | 10,507,057 |
 | First published report (id 1) | `0xdbb38f2bfb34d14c57a2ea2bdb04fe4c6b516bf41b6b844d696f374a717f380b` | 10,507,117 |
 
-Web app: https://rivet-alpha-rose.vercel.app (Vercel, Node 24). It is read-only: no operator keys are configured there, so it can run the suites and verify attestations but can't publish. Because the OpenSSL command-line tool isn't available there, deterministic OpenSSL signing is reported as unsupported.
+Web app: https://rivetpq.vercel.app (Vercel, Node 24). It is read-only: no operator keys are configured there, so it can run the suites and verify attestations but can't publish. Because the OpenSSL command-line tool isn't available there, deterministic OpenSSL signing is reported as unsupported.
 
 Explorer: https://explore.qore.network. The machine-readable record is `deployments/diana.json`.
 
