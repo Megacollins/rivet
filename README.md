@@ -1,5 +1,7 @@
 # Rivet: make cryptographic integrations hold
 
+![Rivet: make cryptographic integrations hold](docs/cover.png)
+
 Rivet is a post-quantum interoperability and conformance lab for **ML-DSA-87 on QoreChain**. It signs with independent implementations and verifies every signature with every implementation, including QoreChain's live `pqcVerify` precompile. It then attacks the results and publishes a reproducible report whose ML-DSA-87 attestation is verified **on-chain**.
 
 Built for QoreChain *Build Before Q-Day*, Post-Quantum dApp track, on the **Diana testnet** (EVM chain id 9800).
