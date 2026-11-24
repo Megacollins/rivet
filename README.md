@@ -76,9 +76,25 @@ Publishing from the web app requires `RIVET_WEB_OPERATOR=1` and the operator key
 ## Security assumptions
 
 - The registry trusts QoreChain's `pqcVerify` and `pqcKeyStatus` precompiles. An unavailable precompile reverts with `PrecompileUnavailable` instead of being treated as success.
-- An attester's key must be the exact x/pqc key the chain reports for that account, with possession proven. A deactivated key cannot be revived.
+- An attester's key must be the exact x/pqc key the chain reports for that account, with possession proven. A deactivated key can never be registered again by that attester, even after rotating away and back (v2).
 - Signed messages are tagged `RIVET/ATTEST/v1` and bound to the chain id, the contract, the attester, a nonce and a deadline. The tag can't collide with QoreChain's own transaction frames.
 - A report hash proves integrity and authorship, not correctness. Anyone can re-run the suites.
+
+## Credits
+
+Rivet is built on these open-source projects. No QoreChain kit or template was used.
+
+| Project | Used for | Licence |
+|---|---|---|
+| [@noble/post-quantum](https://github.com/paulmillr/noble-post-quantum) 0.7.1 | ML-DSA-87 signer and verifier (engine, browser, Foundry FFI) | MIT |
+| [OpenSSL](https://www.openssl.org) 3.5 (through Node's `node:crypto` and the `openssl` CLI) | Second independent ML-DSA-87 signer and verifier | Apache-2.0 |
+| [@noble/hashes](https://github.com/paulmillr/noble-hashes) 2.4.0, [@scure/base](https://github.com/paulmillr/scure-base) 1.2.6 | Hashing, bech32 addresses | MIT |
+| [@qorechain/sdk](https://www.npmjs.com/package/@qorechain/sdk) 0.14.0 | PQC key registration and EVM window messages (native lane) | Apache-2.0 |
+| [@cosmjs/stargate](https://github.com/cosmos/cosmjs) 0.39.0 | Broadcasting native transactions | Apache-2.0 |
+| [viem](https://viem.sh) 2.58.4 | EVM RPC, `eth_call`, contract calls | MIT |
+| [Foundry](https://getfoundry.sh) and [forge-std](https://github.com/foundry-rs/forge-std) | Contract build and tests | MIT / Apache-2.0 |
+| [Next.js](https://nextjs.org) 16, [React](https://react.dev) 19, [Tailwind CSS](https://tailwindcss.com) 4 | Web app | MIT |
+| [Inter](https://rsms.me/inter/) and [JetBrains Mono](https://www.jetbrains.com/lp/mono/), via Google Fonts | Typography | SIL OFL 1.1 |
 
 ## License
 
