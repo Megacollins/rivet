@@ -117,13 +117,16 @@ cd contracts && forge test                 # 28 tests; pqcVerify served by real 
           </ul>
 
           <H id="findings">Findings</H>
-          <div className="rounded-xl border border-unsup/30 bg-unsup/[0.05] p-4">
-            <div className="font-medium text-fg">F-1 · pqcVerify rejects valid signatures over the empty message</div>
+          <div className="rounded-xl border border-pass/30 bg-pass/[0.05] p-4">
+            <div className="font-medium text-fg">F-1 · pqcVerify rejected valid signatures over the empty message <span className="text-pass-soft">· fixed</span></div>
             <p className="mt-1.5 text-[13.5px]">
-              On Diana (chain v3.2.8) the precompile returns <C>false</C> for valid ML-DSA-87 signatures over a 0-byte message, hedged or
-              deterministic, from either library. @noble/post-quantum and OpenSSL both accept them, and FIPS 204 allows empty messages. Messages of
-              one byte or more, including <C>0x00</C>, verify correctly. It is a false rejection with no security impact, and it is pinned as a live
-              regression test. dApps should not ask the precompile to verify empty messages. Rivet&apos;s signed messages are always 239 bytes.
+              Up to block 10,654,799 on Diana (chain v3.2.8), the precompile returned <C>false</C> for valid ML-DSA-87 signatures over a 0-byte
+              message, hedged or deterministic, from either library. @noble/post-quantum and OpenSSL both accept them, and FIPS 204 allows empty
+              messages. Messages of one byte or more always verified. It was a false rejection with no security impact.
+            </p>
+            <p className="mt-2 text-[13.5px]">
+              From block 10,654,800 (2026-11-24) the precompile accepts them. Report #1 records the failure and report #2 the fix, both attested on
+              chain. A live regression test checks both sides of that block. Rivet&apos;s own signed messages are always 239 bytes, so it was never affected.
             </p>
           </div>
 

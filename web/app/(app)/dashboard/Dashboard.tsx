@@ -53,10 +53,10 @@ export function Dashboard() {
           </Link>
         </div>
 
-        <Callout tone="warn" title="Finding F-1 · pqcVerify rejects valid signatures over the empty message">
-          On Diana, the precompile returns <span className="mono">false</span> for a valid ML-DSA-87 signature over a 0-byte message,
-          while @noble/post-quantum and OpenSSL accept it. 1-byte messages verify. This is a false rejection, not a forgery,
-          and Rivet&apos;s registry never signs an empty message. <Link className="link" href="/docs#findings">Details</Link>
+        <Callout tone="pass" title="Finding F-1 · fixed by QoreChain at block 10,654,800">
+          Rivet found that Diana&apos;s precompile returned <span className="mono">false</span> for valid ML-DSA-87 signatures over a 0-byte message,
+          which @noble/post-quantum and OpenSSL accept. It now accepts them. Report #1 records the bug and report #2 the fix, both on chain.{' '}
+          <Link className="link" href="/docs#findings">Details</Link>
         </Callout>
       </div>
     </>

@@ -25,15 +25,19 @@ export async function pinBlock(): Promise<bigint> {
   return pinnedBlock;
 }
 
-/** Calls QoreChain's real pqcVerify precompile with eth_call. Never simulated. */
-export async function chainVerify(pk: Uint8Array, msg: Uint8Array, sig: Uint8Array): Promise<VerifyOutcome> {
+/**
+ * Calls QoreChain's real pqcVerify precompile with eth_call. Never simulated.
+ * `at` overrides the pinned block (used to check behaviour before and after a chain upgrade).
+ */
+export async function chainVerify(pk: Uint8Array, msg: Uint8Array, sig: Uint8Array, at?: bigint): Promise<VerifyOutcome> {
+  const block = at ?? pinnedBlock;
   const data = encodeFunctionData({ abi: pqcAbi, functionName: 'pqcVerify', args: [toHex(pk), toHex(sig), toHex(msg)] });
   const evidence = {
     rpc: DIANA.evmRpc, chainId: DIANA.evmChainId, to: DIANA.pqcVerify,
-    blockNumber: pinnedBlock?.toString(), calldataHash: keccak256(data),
+    blockNumber: block?.toString(), calldataHash: keccak256(data),
   };
   try {
-    const res = await publicClient.call({ to: DIANA.pqcVerify, data, blockNumber: pinnedBlock });
+    const res = await publicClient.call({ to: DIANA.pqcVerify, data, blockNumber: block });
     if (!res.data || res.data === '0x') return { valid: false, error: 'precompile returned empty data (inactive?)', evidence };
     return { valid: decodeFunctionResult({ abi: pqcAbi, functionName: 'pqcVerify', data: res.data }), evidence };
   } catch (e) {

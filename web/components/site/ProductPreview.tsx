@@ -13,7 +13,7 @@ const SHOTS = [
   {
     id: 'report', tab: 'Report #1', src: '/preview/report.png', href: '/reports/5f696de1-d700-48cd-8998-468cc738c30b',
     alt: 'Rivet report #1: 125 of 136 checks passed, 3 failed, 0 critical; interoperability matrix with failures on the empty-message vector',
-    caption: 'Report #1: 136 checks pinned to one Diana block. The red dots in the matrix are finding F-1, the empty-message divergence.',
+    caption: 'Report #1: 136 checks pinned to one Diana block. The red dots in the matrix are finding F-1, the empty-message divergence, since fixed by QoreChain.',
   },
 ] as const;
 

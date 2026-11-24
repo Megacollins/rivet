@@ -116,8 +116,8 @@ export default function Landing() {
             <div><span className="mr-2 inline-block h-1.5 w-1.5 rounded-full bg-unsup align-middle" /><span className="text-fg">Planned:</span> CIRCL, liboqs, Bouncy Castle (reported as unsupported)</div>
           </Reveal>
           <Reveal className="mt-8">
-            <p className="max-w-3xl border-l-2 border-unsup/50 pl-4 text-[15px] leading-relaxed text-fg-muted">
-              <span className="text-fg">Finding F-1:</span> on Diana, <Code>pqcVerify</Code> rejects valid signatures over the empty message, which both libraries accept.{' '}
+            <p className="max-w-3xl border-l-2 border-pass/50 pl-4 text-[15px] leading-relaxed text-fg-muted">
+              <span className="text-fg">Finding F-1:</span> Rivet caught <Code>pqcVerify</Code> rejecting valid signatures over the empty message. QoreChain fixed it at block 10,654,800, and both reports are on chain.{' '}
               <Link href="/docs#findings" className="link">Read the finding</Link>
             </p>
           </Reveal>

@@ -21,13 +21,17 @@ test('precompile accepts a valid ML-DSA-87 signature (noble + OpenSSL-signed)', 
   assert.equal((await chainVerify(pk, msg, await openssl.sign(seed, msg, { deterministic: false }))).valid, true);
 });
 
-test('KNOWN DIVERGENCE: precompile rejects a valid signature over the empty message', async () => {
+// Finding F-1 (docs/FINDINGS.md): Diana rejected valid empty-message signatures until a chain upgrade at this block.
+const F1_FIXED_AT = 10_654_800n;
+
+test('F-1: precompile rejected a valid empty-message signature before the fix, and accepts it after', async () => {
   const pk = await noble.publicKeyFromSeed(seed);
   const empty = new Uint8Array(0);
   const sig = await noble.sign(seed, empty, { deterministic: true });
   assert.equal((await noble.verify(pk, empty, sig)).valid, true, 'FIPS 204 reference accepts');
-  // If this ever starts passing, QoreChain fixed it: update docs/FINDINGS.md.
-  assert.equal((await chainVerify(pk, empty, sig)).valid, false);
+  assert.equal((await chainVerify(pk, empty, sig, F1_FIXED_AT - 1n)).valid, false, 'last block before the fix rejects');
+  assert.equal((await chainVerify(pk, empty, sig, F1_FIXED_AT)).valid, true, 'first fixed block accepts');
+  assert.equal((await chainVerify(pk, empty, sig)).valid, true, 'latest block accepts (a regression would fail here)');
 });
 
 test('precompile rejects every Attack Lab case', async () => {

@@ -33,13 +33,14 @@ On QoreChain an EVM transaction is still signed with **classical ECDSA**. The ch
 
 Rivet deployed the registry inside an **unscoped** window, because creation requires one. It publishes every report inside a window **scoped to the registry only**. The report attestation is a *separate* ML-DSA-87 signature, checked by the contract through `pqcVerify`. See `engine/scripts/qore.ts` and [DEPLOYMENTS.md](DEPLOYMENTS.md).
 
-## Live results (Diana, 2026-11-21)
+## Live results (Diana)
 
-- Full run: **136 tests; 125 passed, 3 failed (0 critical), 1 skipped, 7 unsupported**.
-  - The 3 failures are [finding F-1](docs/FINDINGS.md): `pqcVerify` returns `false` for valid signatures over the **empty message**.
-  - The skip (spent nonce) passed on the rerun after the first publish.
+- **Report #1 (2026-11-21):** 136 tests; 125 passed, 3 failed (0 critical), 1 skipped, 7 unsupported.
+  - The 3 failures are [finding F-1](docs/FINDINGS.md): `pqcVerify` returned `false` for valid signatures over the **empty message**.
+- **Report #2 (2026-11-24):** 136 tests; **129 passed, 0 failed**, 0 skipped, 7 unsupported.
+  - QoreChain fixed F-1 at block 10,654,800. Both reports are attested on chain, before and after the fix.
 - Replay suite on the deployed registry: **10/10**.
-- Report #1 is published and independently verified, **11/11 checks** (noble, OpenSSL, `pqcVerify`, `verifyAttestation`, `pqcKeyStatus`, report hash, summary).
+- Both reports are published and independently verified, **11/11 checks** each (noble, OpenSSL, `pqcVerify`, `verifyAttestation`, `pqcKeyStatus`, report hash, summary).
 - Foundry: **28/28**. `pqcVerify` is served in tests by a real ML-DSA-87 verifier over FFI, not a stub.
 
 ## Layout
