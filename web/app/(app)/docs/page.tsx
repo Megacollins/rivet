@@ -105,7 +105,7 @@ export default function Docs() {
 node engine/src/cli.ts run                 # all suites, live on Diana → reports/<id>.json
 node engine/src/cli.ts run --offline       # local implementations only
 node engine/src/cli.ts verify 1 --file reports/<id>.json
-cd contracts && forge test                 # 28 tests; pqcVerify served by real ML-DSA via FFI`}</Code>
+cd contracts && forge test                 # 33 tests; pqcVerify served by real ML-DSA via FFI`}</Code>
 
           <H id="assumptions">Security assumptions</H>
           <ul className="list-disc space-y-1.5 pl-5">

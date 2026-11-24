@@ -356,6 +356,75 @@ contract RivetRegistryTest is Test {
         reg.publishReport(q, pkA, new bytes(4627));
     }
 
+    // ----------------------------------------------------------------- QCAI stage 1 regression tests (docs/AUDIT.md)
+
+    /// QCAI-1: registration is open by design, but only for the caller's own chain key,
+    /// and a newcomer can neither change an existing attester's record nor sign as them.
+    function test_qcai1_openRegistration_cannotTouchOtherAttesters() public {
+        (bytes32 keyBefore, uint64 nonceBefore,, bool activeBefore) = reg.attesters(alice);
+
+        address mallory = makeAddr("mallory");
+        keyStatus.set(mallory, true, 1, pkB, true);
+        vm.prank(mallory);
+        reg.registerAttester(pkB); // succeeds: mallory registers her own key
+
+        (bytes32 keyAfter, uint64 nonceAfter,, bool activeAfter) = reg.attesters(alice);
+        assertEq(keyAfter, keyBefore);
+        assertEq(nonceAfter, nonceBefore);
+        assertEq(activeAfter, activeBefore);
+
+        // mallory cannot publish as alice with her own key, signed or not
+        RivetRegistry.PublishRequest memory q = _req(alice, keccak256("r"), 0);
+        bytes memory sig = _signPublish(SEED_B, reg, q);
+        vm.expectRevert(RivetRegistry.PubkeyMismatch.selector);
+        reg.publishReport(q, pkB, sig);
+    }
+
+    /// QCAI-2: the uint64 nonce uses checked arithmetic; at the maximum it reverts, never wraps to 0.
+    function test_qcai2_nonceAtMaxReverts_neverWraps() public {
+        bytes32 slot = bytes32(uint256(keccak256(abi.encode(alice, uint256(0)))) + 1); // attesters[alice].{nonce,registeredAt,active}
+        bytes32 packed = vm.load(address(reg), slot);
+        packed = (packed & ~bytes32(uint256(type(uint64).max))) | bytes32(uint256(type(uint64).max));
+        vm.store(address(reg), slot, packed);
+        (, uint64 nonce,,) = reg.attesters(alice);
+        assertEq(nonce, type(uint64).max);
+
+        RivetRegistry.PublishRequest memory q = _req(alice, keccak256("r"), type(uint64).max);
+        bytes memory sig = _signPublish(SEED_A, reg, q);
+        vm.expectRevert(abi.encodeWithSignature("Panic(uint256)", 0x11)); // arithmetic overflow
+        reg.publishReport(q, pkA, sig);
+    }
+
+    /// QCAI-3: a precompile that reverts (not just an empty address) also fails closed.
+    function test_qcai3_revertingPrecompile_failsClosed() public {
+        vm.etch(PQC_VERIFY, hex"60006000fd"); // PUSH1 0 PUSH1 0 REVERT
+        RivetRegistry.PublishRequest memory q = _req(alice, keccak256("r"), 0);
+        bytes memory sig = _signPublish(SEED_A, reg, q);
+        vm.expectRevert(abi.encodeWithSelector(RivetRegistry.PrecompileUnavailable.selector, PQC_VERIFY));
+        reg.publishReport(q, pkA, sig);
+        assertEq(reg.reportCount(), 0);
+    }
+
+    /// QCAI-4: a signed PUBLISH cannot be replayed as DEACTIVATE (the action is inside the signed message).
+    function test_qcai4_publishSignatureCannotDeactivate() public {
+        RivetRegistry.PublishRequest memory q = _req(alice, keccak256("r"), 0);
+        bytes memory sig = _signPublish(SEED_A, reg, q);
+        vm.expectRevert(RivetRegistry.InvalidSignature.selector);
+        reg.deactivateAttester(alice, 0, q.deadline, pkA, sig);
+        (,,, bool active) = reg.attesters(alice);
+        assertTrue(active);
+    }
+
+    /// QCAI-4: one nonce sequence covers every action, so a nonce spent by PUBLISH is spent for REVOKE too.
+    function test_qcai4_nonceSharedAcrossActions() public {
+        RivetRegistry.PublishRequest memory q = _req(alice, keccak256("r"), 0);
+        reg.publishReport(q, pkA, _signPublish(SEED_A, reg, q));
+        bytes memory revokeMsg = reg.signingMessage(reg.ACTION_REVOKE(), alice, 0, q.deadline, reg.revokePayload(1));
+        bytes memory sig = MlDsa.sign(SEED_A, revokeMsg);
+        vm.expectRevert(abi.encodeWithSelector(RivetRegistry.BadNonce.selector, 1, 0));
+        reg.revokeReport(1, 0, q.deadline, pkA, sig);
+    }
+
     // -----------------------------------------------------------------
 
     function _slice(bytes memory b, uint256 n) internal pure returns (bytes memory out) {
