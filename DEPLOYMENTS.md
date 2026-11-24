@@ -10,6 +10,7 @@
 | Operator / attester (native) | `qor1tga4cqmqpnlkvpv8k8ry7cvsjareyspla69l6y` | |
 | `registerAttester` tx | `0x5bd51b0437469fa44e2c411363894c7edcd35e2a2defc1675535ac0eae392cad` | 10,507,057 |
 | First published report (id 1) | `0xdbb38f2bfb34d14c57a2ea2bdb04fe4c6b516bf41b6b844d696f374a717f380b` | 10,507,117 |
+| Second published report (id 2) | `0x3dd4bc8becdd0e1b377173474490d1a7e03a2b7b0206f4d639564d742431ebf9` | 10,664,547 |
 
 Web app: https://rivetpq.vercel.app (Vercel, Node 24). It is read-only: no operator keys are configured there, so it can run the suites and verify attestations but can't publish. Because the OpenSSL command-line tool isn't available there, deterministic OpenSSL signing is reported as unsupported.
 
@@ -41,3 +42,12 @@ The deploy and `registerAttester` txs ran inside window 2. All later report publ
   - The key hash matches the attester's x/pqc key.
   - The report JSON hash and summary match what is on chain.
 - `publishReport` used 508,182 gas, including the real `pqcVerify` call made inside a transaction.
+
+### Full loop rerun (2026-11-24)
+
+- `qore.ts window`: a new window scoped to RivetRegistry (2,400 blocks, 5 txs), native tx `EA1405F791CDA86B2B657831D088A5CE348998252666B36C66939B55D0758F72` at block 10,664,446.
+- `node engine/src/cli.ts run`: 136 tests; **129 passed, 0 failed**, 0 skipped, 7 unsupported. Replay 10 of 10. Report `d9609615-3f96-4f8c-956e-e24b48686346`, hash `0x4415a2ab…fb82136a`.
+- `node engine/src/cli.ts publish`: report id 2, 490,866 gas, block 10,664,547.
+- `node engine/src/cli.ts verify 2 --file …`: 11 of 11 independent checks pass.
+
+**Finding F-1 no longer reproduces.** The same ML-DSA-87 signature over the empty message, sent to `pqcVerify` by `eth_call`, returns `false` at every block up to 10,654,799 and `true` from block 10,654,800 (2026-11-24 07:32:21 UTC). One-byte messages verify at every block checked. The clean switch at one height suggests a chain upgrade. Report 1 (before the change) and report 2 (after it) both stay on chain as a record.
