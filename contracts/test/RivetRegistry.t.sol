@@ -467,6 +467,18 @@ contract RivetRegistryTest is Test {
         reg.publishReport(q2, pkA, sig);
     }
 
+    // ----------------------------------------------------------------- QCAI v2 run regression tests (docs/AUDIT.md)
+
+    /// QCAI-V2-2: `++reportCount` is checked arithmetic (Solidity 0.8); at the maximum it reverts, never wraps.
+    function test_qcaiV2_reportCountAtMaxReverts_neverWraps() public {
+        vm.store(address(reg), bytes32(uint256(4)), bytes32(type(uint256).max)); // slot 4 = reportCount
+        assertEq(reg.reportCount(), type(uint256).max);
+        RivetRegistry.PublishRequest memory q = _req(alice, keccak256("r"), 0);
+        bytes memory sig = _signPublish(SEED_A, reg, q);
+        vm.expectRevert(abi.encodeWithSignature("Panic(uint256)", 0x11)); // arithmetic overflow
+        reg.publishReport(q, pkA, sig);
+    }
+
     // -----------------------------------------------------------------
 
     function _slice(bytes memory b, uint256 n) internal pure returns (bytes memory out) {

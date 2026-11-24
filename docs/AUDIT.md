@@ -1,6 +1,6 @@
 # QCAI audit
 
-Rivet's on-chain contract, `RivetRegistry`, was audited with QoreChain's AI Smart Contract Auditor at https://dashboard.qorechain.io/audit in two stages. Both stages use the same setting so the reports can be compared:
+Rivet's on-chain contract, `RivetRegistry`, was audited with QoreChain's AI Smart Contract Auditor at https://dashboard.qorechain.io/audit in two stages, plus a third run on the fixed v2 contract. All runs use the same setting so the reports can be compared:
 
 - **Blockchain:** Ethereum (EVM/Solidity)
 - **Name:** `RivetRegistry`
@@ -10,6 +10,7 @@ Rivet's on-chain contract, `RivetRegistry`, was audited with QoreChain's AI Smar
 |---|---|---|---|
 | 1 | 2026-11-24 | [`audit/stage1-2026-11-24.pdf`](audit/stage1-2026-11-24.pdf) | Score 85/100, 4 findings (1 high, 2 medium, 1 low). Quantum readiness "not scored for this setting". |
 | 2 | 2026-11-24 | [`audit/stage2-2026-11-24.pdf`](audit/stage2-2026-11-24.pdf) | Score 85/100. None of the 4 stage 1 findings came back. 3 new findings (1 medium, 1 low, 1 info). The medium one was real and is **fixed in v2**. |
+| 3 (v2) | 2026-11-24 | [`audit/stage3-v2-2026-11-24.pdf`](audit/stage3-v2-2026-11-24.pdf) | Optional run on the fixed v2 source. Score 82/100. The stage 2 medium finding is **gone**. 4 findings: 1 repeats stage 1, 3 are new and none is real (see below). No contract change. |
 
 Stage 1 led to no contract changes, so both stages audited the same code: v1, deployed at `0x2afd0bfb2cae5b1f3d0a96265f7b314cb514205c`. Stage 2's medium finding was real. The contract was fixed and **redeployed as v2** at `0xbff74b159e7b5988c8a0030c817363074322acd4`, and v2's on-chain bytecode matches the build of the fixed source. The v1 → v2 diff is only that fix: one mapping, one check and one write. See [DEPLOYMENTS.md](../DEPLOYMENTS.md).
 
@@ -17,7 +18,7 @@ Stage 1 led to no contract changes, so both stages audited the same code: v1, de
 
 ## Stage 1 findings and responses
 
-Each finding is either fixed, covered by a named regression test, or explained as a false positive. All tests are in [`contracts/test/RivetRegistry.t.sol`](../contracts/test/RivetRegistry.t.sol), and all 35 pass (`forge test`).
+Each finding is either fixed, covered by a named regression test, or explained as a false positive. All tests are in [`contracts/test/RivetRegistry.t.sol`](../contracts/test/RivetRegistry.t.sol), and all 36 pass (`forge test`).
 
 ### QCAI-1 · HIGH · Missing access control on critical functions (`registerAttester`)
 
@@ -109,6 +110,31 @@ Test:
 **Response: by design.**
 
 The registry is an append-only public record. Its purpose is that anyone can later check what was attested and when, so pruning old reports would delete the evidence. Growth is also self-limiting: every entry needs a valid ML-DSA-87 signature from a registered attester, a fresh nonce and a new report hash, and the sender pays the storage gas.
+
+## Third run (v2) findings and responses
+
+This optional run audited [`audit/RivetRegistry.v2.flat.sol`](audit/RivetRegistry.v2.flat.sol), the source deployed as v2. It was entered under the name "Rivet reg." with the same Ethereum (EVM/Solidity) setting. The revoked-key finding fixed in v2 doesn't appear. None of the four findings below needed a contract change, so v2 stays as deployed.
+
+### QCAI-V2-1 · HIGH · Missing access control on critical functions (`registerAttester`)
+
+**Response: same as stage 1 [QCAI-1](#qcai-1--high--missing-access-control-on-critical-functions-registerattester).** Registration is open by design, but a caller can only register as itself and only with its own QoreChain ML-DSA-87 key, with proof of possession. The report suggests users could "register with a provided public key". They can't: a key that differs from the caller's chain key reverts with `PubkeyMismatch` (`test_register_pubkeyMustMatchChainKey`, `test_qcai1_openRegistration_cannotTouchOtherAttesters`).
+
+### QCAI-V2-2 · MEDIUM · Potential overflow in report ID management
+
+**Response: false positive. Covered by a regression test.**
+
+`reportId = ++reportCount` is a `uint256` in Solidity 0.8.28, where arithmetic is checked, so it reverts rather than wraps. SafeMath is redundant since Solidity 0.8. Reaching 2²⁵⁶ reports is also physically impossible.
+
+Test:
+- `test_qcaiV2_reportCountAtMaxReverts_neverWraps` (new): sets `reportCount` to `type(uint256).max` and checks that publishing reverts with an arithmetic-overflow panic (`0x11`).
+
+### QCAI-V2-3 · LOW · Unbounded loop potential in revoked keys mapping
+
+**Response: false positive.** The contract has no loops at all: no `for` or `while` anywhere in `RivetRegistry.sol`. `revokedKeys[attester][keyHash]` is a nested mapping. Checking it in `registerAttester` is a single storage read and setting it in `deactivateAttester` is a single write, so the cost is the same however many keys an attester has revoked. Mappings can't be iterated, so nothing in the contract can grow into a loop.
+
+### QCAI-V2-4 · INFO · Domain tag length mismatch
+
+**Response: intended, and documented in the contract.** The comment the auditor refers to explains why the tag was chosen, not a length the contract checks. Every Rivet-signed message starts with the ASCII bytes `RIVET/ATTEST/v1`. If anything ever misread a Rivet message as QoreChain's own v1 hybrid sign-bytes frame, whose first four bytes are a length, those bytes (`RIVE` = `0x52495645`) would declare a length of about 1.38 GB. That can never match a real frame, so a Rivet attestation signature can't be confused with a chain transaction signature. The tag also differs from the `qorechain-pqc-hybrid-v2` and `qorechain-pqc-pop-v1` prefixes the chain signs. The tag itself is fixed (`DOMAIN_TAG`), and its exact use is pinned by `test_signingMessage_layout` and `test_engineEncoding_matchesContract`.
 
 ## Post-quantum design
 

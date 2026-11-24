@@ -14,7 +14,7 @@ Built for QoreChain *Build Before Q-Day*, Post-Quantum dApp track, on the **Dian
 | Operator / attester | `qor1tga4cqmqpnlkvpv8k8ry7cvsjareyspla69l6y` (`0x5A3B5C03600cFF660587B1c64f6190974792403F`) |
 | Deployment record | [DEPLOYMENTS.md](DEPLOYMENTS.md) · [deployments/diana.json](deployments/diana.json) |
 | Findings | [docs/FINDINGS.md](docs/FINDINGS.md) |
-| QCAI audit | [docs/AUDIT.md](docs/AUDIT.md): two-stage QCAI audit. Stage 1 (4 findings) answered with 5 regression tests; stage 2 (3 findings) found one real issue, fixed and redeployed as v2. Reports in `docs/audit/` |
+| QCAI audit | [docs/AUDIT.md](docs/AUDIT.md): two-stage QCAI audit. Stage 1 (4 findings) answered with 5 regression tests; stage 2 (3 findings) found one real issue, fixed and redeployed as v2; a third run on v2 found nothing real. Reports in `docs/audit/` |
 
 ## What it does
 
@@ -44,7 +44,7 @@ Rivet deployed the registry inside an **unscoped** window, because creation requ
 - Replay suite on the deployed registry: **10/10**.
 - **Registry v2 (2026-11-24),** redeployed with the QCAI stage 2 fix ([docs/AUDIT.md](docs/AUDIT.md)): reports #1 and #2, 136 tests each, 0 failed.
 - All four reports are published and independently verified, **11/11 checks** each (noble, OpenSSL, `pqcVerify`, `verifyAttestation`, `pqcKeyStatus`, report hash, summary).
-- Foundry: **35/35** (including 7 regression tests for the QCAI findings). `pqcVerify` is served in tests by a real ML-DSA-87 verifier over FFI, not a stub.
+- Foundry: **36/36** (including 8 regression tests for the QCAI findings). `pqcVerify` is served in tests by a real ML-DSA-87 verifier over FFI, not a stub.
 
 ## Layout
 
