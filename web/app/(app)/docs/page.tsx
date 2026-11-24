@@ -105,7 +105,7 @@ export default function Docs() {
 node engine/src/cli.ts run                 # all suites, live on Diana → reports/<id>.json
 node engine/src/cli.ts run --offline       # local implementations only
 node engine/src/cli.ts verify 1 --file reports/<id>.json
-cd contracts && forge test                 # 33 tests; pqcVerify served by real ML-DSA via FFI`}</Code>
+cd contracts && forge test                 # 35 tests; pqcVerify served by real ML-DSA via FFI`}</Code>
 
           <H id="assumptions">Security assumptions</H>
           <ul className="list-disc space-y-1.5 pl-5">
@@ -125,8 +125,8 @@ cd contracts && forge test                 # 33 tests; pqcVerify served by real 
               messages. Messages of one byte or more always verified. It was a false rejection with no security impact.
             </p>
             <p className="mt-2 text-[13.5px]">
-              From block 10,654,800 (2026-11-24) the precompile accepts them. Report #1 records the failure and report #2 the fix, both attested on
-              chain. A live regression test checks both sides of that block. Rivet&apos;s own signed messages are always 239 bytes, so it was never affected.
+              From block 10,654,800 (2026-11-24) the precompile accepts them. Reports #1 and #2 on registry v1 record the failure and the fix, both
+              attested on chain. A live regression test checks both sides of that block. Rivet&apos;s own signed messages are always 239 bytes, so it was never affected.
             </p>
           </div>
 

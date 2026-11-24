@@ -2,9 +2,29 @@
 
 ## QoreChain Diana testnet (`qorechain-diana`, EVM chain id 9800)
 
+### RivetRegistry v2 (current)
+
+Redeployed on 2026-11-24 with the fix for the QCAI stage 2 finding: a deactivated key now stays revoked even after the attester rotates to another key and back. See [docs/AUDIT.md](docs/AUDIT.md). The attester is the same operator account and ML-DSA-87 key as in v1.
+
 | What | Address / tx | Block |
 |---|---|---|
-| **RivetRegistry** | `0x2afd0bfb2cae5b1f3d0a96265f7b314cb514205c` | 10,507,055 |
+| **RivetRegistry v2** | `0xbff74b159e7b5988c8a0030c817363074322acd4` | 10,674,964 |
+| Deploy tx | `0xbc95d9e4c30eb17a201e659e6917aecde028d0149609e1a20f2bbe6324514d0e` | 10,674,964 |
+| `registerAttester` tx | `0xef071ed8fa0c1c507078213c5cb710cffdc24aa2ee71b7dc2281ea771c36f271` | 10,674,967 |
+| Report id 1 (`d69639b8…`: 128 passed, 0 failed, 1 skipped) | `0xb482d15ac56ef820b6fe4fcf4bf8d98dbb4f72b4020642d2e935d0171e195b26` | 10,675,043 |
+| Report id 2 (`622e1296…`: 129 passed, 0 failed, 0 skipped) | `0x2f773b65f14200ee0df19efc669152c763248919eb8eb4a108d3e2dcedd51071` | 10,675,069 |
+
+Native transactions:
+- unscoped window for the deploy: `BF70672032D9D068203407FDEA9F7B9CAF8662D59181FBF5EA08811D69A39A18`, block 10,674,935;
+- window scoped to v2 only: `2587609A8EC8EFC09D55F114A723675FD96C4AC16737D5B20E69A1F823CFBE51`, block 10,674,998.
+
+The deployed runtime bytecode is identical to `contracts/out` built from this commit, checked with `eth_getCode`. Both reports are independently verified, 11 of 11 checks each (`node engine/src/cli.ts verify <id> --file …`). The 1 skip in report 1 is the spent-nonce replay case, which needs an existing report; it passes in report 2. The machine-readable record is `deployments/diana.json`; v1's is `deployments/diana.v1.json`.
+
+### RivetRegistry v1 (superseded; keeps the F-1 before/after reports)
+
+| What | Address / tx | Block |
+|---|---|---|
+| **RivetRegistry v1** | `0x2afd0bfb2cae5b1f3d0a96265f7b314cb514205c` | 10,507,055 |
 | Deploy tx | `0x5789bbe16c2bdc35b19d83709b54dc7591ac44d1ded4447b8ac4d06ab346ec3a` | 10,507,055 |
 | Operator / attester (EVM) | `0x5A3B5C03600cFF660587B1c64f6190974792403F` | |
 | Operator / attester (native) | `qor1tga4cqmqpnlkvpv8k8ry7cvsjareyspla69l6y` | |
@@ -14,7 +34,7 @@
 
 Web app: https://rivetpq.vercel.app (Vercel, Node 24). It is read-only: no operator keys are configured there, so it can run the suites and verify attestations but can't publish. Because the OpenSSL command-line tool isn't available there, deterministic OpenSSL signing is reported as unsupported.
 
-Explorer: https://explore.qore.network. The machine-readable record is `deployments/diana.json`.
+Explorer: https://explore.qore.network. v1's machine-readable record is `deployments/diana.v1.json`.
 
 Compiler: solc 0.8.28, EVM `shanghai`, via-IR, optimizer 200 runs (`contracts/foundry.toml`).
 

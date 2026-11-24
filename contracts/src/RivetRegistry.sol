@@ -80,6 +80,8 @@ contract RivetRegistry {
     // ---------------------------------------------------------------------------------
 
     mapping(address => Attester) public attesters;
+    /// @notice Every key an attester has deactivated; a revoked key can never be registered again.
+    mapping(address => mapping(bytes32 => bool)) public revokedKeys;
     mapping(uint256 => Report) internal _reports;
     mapping(bytes32 => uint256) public reportIdByHash;
     uint256 public reportCount;
@@ -139,9 +141,10 @@ contract RivetRegistry {
         bytes32 keyHash = keccak256(pubkey);
         if (keccak256(chainKey) != keyHash) revert PubkeyMismatch();
 
+        // A deactivated (possibly compromised) key can never be used again by this attester,
+        // even after rotating to another key and back (QCAI stage 2 finding).
+        if (revokedKeys[msg.sender][keyHash]) revert KeyRevoked();
         Attester storage a = attesters[msg.sender];
-        // A deactivated (possibly compromised) key cannot be revived; rotate the chain key first.
-        if (!a.active && a.keyHash == keyHash) revert KeyRevoked();
         a.keyHash = keyHash;
         a.active = true;
         a.registeredAt = uint64(block.timestamp);
@@ -152,8 +155,9 @@ contract RivetRegistry {
     function deactivateAttester(address attester, uint64 nonce, uint64 deadline, bytes calldata pubkey, bytes calldata signature)
         external
     {
-        _authorise(attester, ACTION_DEACTIVATE, nonce, deadline, bytes32(0), pubkey, signature);
+        bytes32 keyHash = _authorise(attester, ACTION_DEACTIVATE, nonce, deadline, bytes32(0), pubkey, signature);
         attesters[attester].active = false;
+        revokedKeys[attester][keyHash] = true;
         emit AttesterDeactivated(attester, nonce);
     }
 

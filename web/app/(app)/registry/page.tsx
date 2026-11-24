@@ -10,7 +10,7 @@ import { Callout, Hash, PageHeader, Spinner, SummaryBar } from '@/components/ui'
 
 export default function Registry() {
   const { data, error, loading, reload } = useJson<RegistryResponse>('/api/registry');
-  // `/registry?verify=1` starts the in-browser verification of report #1 on arrival (linked from the landing page).
+  // `/registry?verify=<id>` starts the in-browser verification of that report on arrival (linked from the landing page).
   const [autoVerify, setAutoVerify] = useState<string | null>(null);
   useEffect(() => { setAutoVerify(new URLSearchParams(window.location.search).get('verify')); }, []);
   return (

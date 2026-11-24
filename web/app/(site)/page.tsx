@@ -92,7 +92,7 @@ export default function Landing() {
       <section id="product" className="scroll-mt-20 overflow-x-clip border-t border-white/[0.05] px-4 py-24 sm:px-6 md:py-28">
         <div className="mx-auto max-w-6xl">
           <SectionHead center eyebrow="Product" title="Real results, not a mock-up.">
-            Report #1 ran live on Diana: 136 checks, 125 passed, 0 critical.
+            The first report ran live on Diana: 136 checks, 125 passed, 0 critical. Its 3 failures are finding F-1.
           </SectionHead>
           <Reveal className="mt-12"><ProductPreview /></Reveal>
         </div>
@@ -117,7 +117,7 @@ export default function Landing() {
           </Reveal>
           <Reveal className="mt-8">
             <p className="max-w-3xl border-l-2 border-pass/50 pl-4 text-[15px] leading-relaxed text-fg-muted">
-              <span className="text-fg">Finding F-1:</span> Rivet caught <Code>pqcVerify</Code> rejecting valid signatures over the empty message. QoreChain fixed it at block 10,654,800, and both reports are on chain.{' '}
+              <span className="text-fg">Finding F-1:</span> Rivet caught <Code>pqcVerify</Code> rejecting valid signatures over the empty message. QoreChain fixed it at block 10,654,800, and reports from before and after are both on chain.{' '}
               <Link href="/docs#findings" className="link">Read the finding</Link>
             </p>
           </Reveal>
@@ -145,7 +145,7 @@ export default function Landing() {
 }`}</pre>
             </div>
             <div className="mt-5 flex flex-wrap gap-3">
-              <Link href="/registry?verify=1" className="btn-primary">Verify report #1</Link>
+              <Link href="/registry?verify=2" className="btn-primary">Verify the latest report</Link>
               <a href={LINKS.registryExplorer} target="_blank" rel="noreferrer" className="btn-ghost">Contract on Explorer ↗</a>
             </div>
           </Reveal>

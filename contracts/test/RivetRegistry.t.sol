@@ -425,6 +425,48 @@ contract RivetRegistryTest is Test {
         reg.revokeReport(1, 0, q.deadline, pkA, sig);
     }
 
+    // ----------------------------------------------------------------- QCAI stage 2 regression tests (docs/AUDIT.md)
+
+    /// QCAI-S2-1: a deactivated key stays revoked even after rotating to another key and back (A → B → A).
+    function test_qcaiS2_revokedKeyCannotReturnAfterRotation() public {
+        uint64 deadline = uint64(block.timestamp + 600);
+        bytes memory m = reg.signingMessage(reg.ACTION_DEACTIVATE(), alice, 0, deadline, bytes32(0));
+        reg.deactivateAttester(alice, 0, deadline, pkA, MlDsa.sign(SEED_A, m));
+        assertTrue(reg.revokedKeys(alice, keccak256(pkA)));
+
+        _register(reg, alice, pkB); // rotate to B: allowed
+
+        keyStatus.set(alice, true, 1, pkA, true); // chain key switched back to A
+        vm.prank(alice);
+        vm.expectRevert(RivetRegistry.KeyRevoked.selector);
+        reg.registerAttester(pkA);
+
+        // B is still the active key, and A still cannot sign
+        (bytes32 kh,,, bool active) = reg.attesters(alice);
+        assertEq(kh, keccak256(pkB));
+        assertTrue(active);
+        RivetRegistry.PublishRequest memory q = _req(alice, keccak256("r"), 1);
+        bytes memory sig = _signPublish(SEED_A, reg, q);
+        vm.expectRevert(RivetRegistry.PubkeyMismatch.selector);
+        reg.publishReport(q, pkA, sig);
+    }
+
+    /// QCAI-S2-2: a long URI cannot bloat storage. Only its 32-byte hash is stored, the URI is
+    /// covered by the attester's signature, and the relayer pays for its own calldata.
+    function test_qcaiS2_longUri_storesOnlyHash() public {
+        RivetRegistry.PublishRequest memory q = _req(alice, keccak256("r"), 0);
+        q.uri = string(new bytes(8192));
+        uint256 id = reg.publishReport(q, pkA, _signPublish(SEED_A, reg, q));
+        assertEq(reg.getReport(id).uriHash, keccak256(bytes(q.uri)));
+
+        // and a URI swapped after signing is rejected, whatever its length
+        RivetRegistry.PublishRequest memory q2 = _req(alice, keccak256("r2"), 1);
+        bytes memory sig = _signPublish(SEED_A, reg, q2);
+        q2.uri = string(new bytes(8193));
+        vm.expectRevert(RivetRegistry.InvalidSignature.selector);
+        reg.publishReport(q2, pkA, sig);
+    }
+
     // -----------------------------------------------------------------
 
     function _slice(bytes memory b, uint256 n) internal pure returns (bytes memory out) {

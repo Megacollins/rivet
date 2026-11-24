@@ -17,7 +17,7 @@
 - This holds for hedged and deterministic signatures, and for signatures made by either library.
 - A 1-byte message, including `0x00`, verified correctly.
 
-**Fix.** From block 10,654,800 the precompile accepts the same signatures. The switch happens at exactly one height, which points to a chain upgrade. Rivet's report 1 (block 10,507,117, 3 failures on this vector) and report 2 (block 10,664,547, 0 failures) are both attested on chain, before and after.
+**Fix.** From block 10,654,800 the precompile accepts the same signatures. The switch happens at exactly one height, which points to a chain upgrade. Rivet's reports 1 (block 10,507,117, 3 failures on this vector) and 2 (block 10,664,547, 0 failures) on registry v1 (`0x2afd0bfb2cae5b1f3d0a96265f7b314cb514205c`) are both attested on chain, before and after.
 
 **Reproduce** (independent of Rivet's own encoding; uses Foundry's `cast`):
 

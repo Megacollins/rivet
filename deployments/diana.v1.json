@@ -1,0 +1,23 @@
+{
+  "network": "qorechain-diana",
+  "evmChainId": 9800,
+  "RivetRegistry": {
+    "address": "0x2afd0bfb2cae5b1f3d0a96265f7b314cb514205c",
+    "deployTx": "0x5789bbe16c2bdc35b19d83709b54dc7591ac44d1ded4447b8ac4d06ab346ec3a",
+    "block": 10507055,
+    "deployer": "0x5A3B5C03600cFF660587B1c64f6190974792403F"
+  },
+  "attester": {
+    "address": "0x5A3B5C03600cFF660587B1c64f6190974792403F",
+    "registerTx": "0x5bd51b0437469fa44e2c411363894c7edcd35e2a2defc1675535ac0eae392cad",
+    "block": 10507057,
+    "pubkeyKeccak": "0xf3ad27a78c14c2c469b7d73fb0c291df042ac1411db1694fa981cea79822733f"
+  },
+  "compiler": {
+    "solc": "0.8.28",
+    "evm": "shanghai",
+    "viaIR": true,
+    "optimizerRuns": 200
+  },
+  "deployedAt": "2026-11-21T17:58:03.519Z"
+}

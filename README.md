@@ -10,11 +10,11 @@ Built for QoreChain *Build Before Q-Day*, Post-Quantum dApp track, on the **Dian
 |---|---|
 | **Live app** | **https://rivetpq.vercel.app** (read-only: runs suites live, verifies attestations in your browser) |
 | Source | https://github.com/Megacollins/rivet |
-| Registry (Diana) | [`0x2afd0bfb2cae5b1f3d0a96265f7b314cb514205c`](https://explore.qore.network/address/0x2afd0bfb2cae5b1f3d0a96265f7b314cb514205c) |
+| Registry (Diana) | [`0xbff74b159e7b5988c8a0030c817363074322acd4`](https://explore.qore.network/address/0xbff74b159e7b5988c8a0030c817363074322acd4) (v2). v1, with the F-1 reports: [`0x2afd0bfb2cae5b1f3d0a96265f7b314cb514205c`](https://explore.qore.network/address/0x2afd0bfb2cae5b1f3d0a96265f7b314cb514205c) |
 | Operator / attester | `qor1tga4cqmqpnlkvpv8k8ry7cvsjareyspla69l6y` (`0x5A3B5C03600cFF660587B1c64f6190974792403F`) |
 | Deployment record | [DEPLOYMENTS.md](DEPLOYMENTS.md) · [deployments/diana.json](deployments/diana.json) |
 | Findings | [docs/FINDINGS.md](docs/FINDINGS.md) |
-| QCAI audit | [docs/AUDIT.md](docs/AUDIT.md): two-stage QCAI audit. Stage 1 (85/100, 4 findings) answered with 5 new regression tests; stage 2 *(pending)*. Reports in `docs/audit/` |
+| QCAI audit | [docs/AUDIT.md](docs/AUDIT.md): two-stage QCAI audit. Stage 1 (4 findings) answered with 5 regression tests; stage 2 (3 findings) found one real issue, fixed and redeployed as v2. Reports in `docs/audit/` |
 
 ## What it does
 
@@ -37,13 +37,14 @@ Rivet deployed the registry inside an **unscoped** window, because creation requ
 
 ## Live results (Diana)
 
-- **Report #1 (2026-11-21):** 136 tests; 125 passed, 3 failed (0 critical), 1 skipped, 7 unsupported.
+- **Registry v1, report #1 (2026-11-21):** 136 tests; 125 passed, 3 failed (0 critical), 1 skipped, 7 unsupported.
   - The 3 failures are [finding F-1](docs/FINDINGS.md): `pqcVerify` returned `false` for valid signatures over the **empty message**.
-- **Report #2 (2026-11-24):** 136 tests; **129 passed, 0 failed**, 0 skipped, 7 unsupported.
+- **Registry v1, report #2 (2026-11-24):** 136 tests; **129 passed, 0 failed**, 0 skipped, 7 unsupported.
   - QoreChain fixed F-1 at block 10,654,800. Both reports are attested on chain, before and after the fix.
 - Replay suite on the deployed registry: **10/10**.
-- Both reports are published and independently verified, **11/11 checks** each (noble, OpenSSL, `pqcVerify`, `verifyAttestation`, `pqcKeyStatus`, report hash, summary).
-- Foundry: **33/33** (including 5 regression tests for the QCAI stage 1 findings). `pqcVerify` is served in tests by a real ML-DSA-87 verifier over FFI, not a stub.
+- **Registry v2 (2026-11-24),** redeployed with the QCAI stage 2 fix ([docs/AUDIT.md](docs/AUDIT.md)): reports #1 and #2, 136 tests each, 0 failed.
+- All four reports are published and independently verified, **11/11 checks** each (noble, OpenSSL, `pqcVerify`, `verifyAttestation`, `pqcKeyStatus`, report hash, summary).
+- Foundry: **35/35** (including 7 regression tests for the QCAI findings). `pqcVerify` is served in tests by a real ML-DSA-87 verifier over FFI, not a stub.
 
 ## Layout
 

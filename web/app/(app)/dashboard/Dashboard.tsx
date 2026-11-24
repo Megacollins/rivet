@@ -55,7 +55,7 @@ export function Dashboard() {
 
         <Callout tone="pass" title="Finding F-1 · fixed by QoreChain at block 10,654,800">
           Rivet found that Diana&apos;s precompile returned <span className="mono">false</span> for valid ML-DSA-87 signatures over a 0-byte message,
-          which @noble/post-quantum and OpenSSL accept. It now accepts them. Report #1 records the bug and report #2 the fix, both on chain.{' '}
+          which @noble/post-quantum and OpenSSL accept. It now accepts them. Reports #1 and #2 on registry v1 record the bug and the fix, both on chain.{' '}
           <Link className="link" href="/docs#findings">Details</Link>
         </Callout>
       </div>

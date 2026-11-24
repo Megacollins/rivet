@@ -4,20 +4,20 @@ Rivet's on-chain contract, `RivetRegistry`, was audited with QoreChain's AI Smar
 
 - **Blockchain:** Ethereum (EVM/Solidity)
 - **Name:** `RivetRegistry`
-- **Source:** [`audit/RivetRegistry.flat.sol`](audit/RivetRegistry.flat.sol). This is `contracts/src/RivetRegistry.sol` and its interface flattened into one file with `forge flatten`, because the auditor takes a single pasted source.
+- **Source:** `contracts/src/RivetRegistry.sol` and its interface, flattened into one file with `forge flatten`, because the auditor takes a single pasted source. Both stages audited [`audit/RivetRegistry.v1.flat.sol`](audit/RivetRegistry.v1.flat.sol). The fixed contract is [`audit/RivetRegistry.v2.flat.sol`](audit/RivetRegistry.v2.flat.sol).
 
 | Stage | Date | Report | Result |
 |---|---|---|---|
 | 1 | 2026-11-24 | [`audit/stage1-2026-11-24.pdf`](audit/stage1-2026-11-24.pdf) | Score 85/100, 4 findings (1 high, 2 medium, 1 low). Quantum readiness "not scored for this setting". |
-| 2 | *pending* | | |
+| 2 | 2026-11-24 | [`audit/stage2-2026-11-24.pdf`](audit/stage2-2026-11-24.pdf) | Score 85/100. None of the 4 stage 1 findings came back. 3 new findings (1 medium, 1 low, 1 info). The medium one was real and is **fixed in v2**. |
 
-The audited source is the deployed contract. `contracts/src/RivetRegistry.sol` hasn't changed since it was deployed to Diana at `0x2afd0bfb2cae5b1f3d0a96265f7b314cb514205c` (see [DEPLOYMENTS.md](../DEPLOYMENTS.md)). Stage 1 led to no contract changes, so stage 2 audits the same code.
+Stage 1 led to no contract changes, so both stages audited the same code: v1, deployed at `0x2afd0bfb2cae5b1f3d0a96265f7b314cb514205c`. Stage 2's medium finding was real. The contract was fixed and **redeployed as v2** at `0xbff74b159e7b5988c8a0030c817363074322acd4`, and v2's on-chain bytecode matches the build of the fixed source. The v1 → v2 diff is only that fix: one mapping, one check and one write. See [DEPLOYMENTS.md](../DEPLOYMENTS.md).
 
-> The report's line numbers match neither the pasted file nor the source file, so each finding below is matched to the code by what it describes.
+> The reports' line numbers match neither the pasted file nor the source file, so each finding below is matched to the code by what it describes.
 
 ## Stage 1 findings and responses
 
-Each finding is either fixed, covered by a named regression test, or explained as a false positive. All tests are in [`contracts/test/RivetRegistry.t.sol`](../contracts/test/RivetRegistry.t.sol), and all 33 pass (`forge test`).
+Each finding is either fixed, covered by a named regression test, or explained as a false positive. All tests are in [`contracts/test/RivetRegistry.t.sol`](../contracts/test/RivetRegistry.t.sol), and all 35 pass (`forge test`).
 
 ### QCAI-1 · HIGH · Missing access control on critical functions (`registerAttester`)
 
@@ -73,7 +73,42 @@ Tests:
 - `test_replay_wrongActionContext`: a revoke signature can't be used to publish.
 - `test_revoke_wrongReportIdInPayload`, `test_replay_wrongChainId`, `test_replay_wrongContract`, `test_replay_sameSignatureTwice`, `test_replay_futureNonce`, `test_replay_expiredDeadline`.
 
-The same replay cases were also run against the deployed contract on Diana: 10 of 10 behave as specified (report #2, see [DEPLOYMENTS.md](../DEPLOYMENTS.md)).
+The same replay cases were also run against the deployed contract on Diana: 10 of 10 behave as specified (on v1 in its report #2, and on v2 in its report #2; see [DEPLOYMENTS.md](../DEPLOYMENTS.md)).
+
+## Stage 2 findings and responses
+
+### QCAI-S2-1 · MEDIUM · Privilege escalation via key revocation bypass
+
+**Response: real. Fixed in v2, with a regression test.**
+
+The auditor's wording ("re-registration of a deactivated attester's key if the keyHash matches") doesn't match v1 literally. Re-registering the *same* revoked key directly was already blocked with `KeyRevoked`. But checking the finding uncovered a real gap next to it. v1 remembered only an attester's **current** key, so this sequence worked:
+
+1. Key A is deactivated, for example after a suspected compromise.
+2. The account rotates its QoreChain key to B and re-registers.
+3. The account rotates back to A and re-registers. A could sign reports again.
+
+Exploiting it needs the account owner to switch QoreChain's key for that account back to A, so a thief holding only key A can't do it alone. It still broke the contract's promise that a deactivated key can't be revived.
+
+**Fix (v2).** A new `revokedKeys[attester][keyHash]` mapping is set by `deactivateAttester` and checked by `registerAttester`. A key an attester has deactivated can never be registered by that attester again, whatever happens in between.
+
+Tests:
+- `test_qcaiS2_revokedKeyCannotReturnAfterRotation` (new): A → deactivate → B → A reverts with `KeyRevoked`; B stays active and A can't sign. The same sequence succeeded against v1, which is how the gap was confirmed before fixing.
+- `test_deactivate_blocksPublish_andKeyCannotBeRevived` still passes.
+
+### QCAI-S2-2 · LOW · Missing input validation for URI length
+
+**Response: no storage risk. Covered by a regression test.**
+
+The contract never stores the URI, only its 32-byte `keccak256` hash (`uriHash`). Storage per report is the same whatever the URI's length. The full URI appears only in the `ReportPublished` event, it's covered by the attester's ML-DSA-87 signature, and whoever submits it pays for its calldata and log gas. A hard cap would add a rule without removing any risk.
+
+Test:
+- `test_qcaiS2_longUri_storesOnlyHash` (new): an 8 KB URI publishes and only its hash is stored, and a URI swapped after signing is rejected whatever its length.
+
+### QCAI-S2-3 · INFO · Unbounded storage growth
+
+**Response: by design.**
+
+The registry is an append-only public record. Its purpose is that anyone can later check what was attested and when, so pruning old reports would delete the evidence. Growth is also self-limiting: every entry needs a valid ML-DSA-87 signature from a registered attester, a fresh nonce and a new report hash, and the sender pays the storage gas.
 
 ## Post-quantum design
 
@@ -81,7 +116,7 @@ The same replay cases were also run against the deployed contract on Diana: 10 o
 
 | Precompile | Called from | What it protects |
 |---|---|---|
-| `pqcKeyStatus` at `0x…0a02` | `registerAttester` → `_keyStatus(msg.sender)` | **Who can attest.** The attester's key must be its QoreChain account key: registered, ML-DSA-87, with proof of possession, and identical to the key submitted. Rivet never accepts a key the chain hasn't bound to that account. |
+| `pqcKeyStatus` at `0x…0a02` | `registerAttester` → `_keyStatus(msg.sender)` | **Who can attest.** The attester's key must be its QoreChain account key: registered, ML-DSA-87, with proof of possession, and identical to the key submitted. Rivet never accepts a key the chain hasn't bound to that account. In v2, a key the attester has deactivated is also refused for good. |
 | `pqcVerify` at `0x…0a01` | `publishReport`, `revokeReport`, `deactivateAttester` → `_authorise` → `_pqcVerify` | **Every state change.** Each one needs a valid ML-DSA-87 signature over the domain-tagged message. The EVM sender doesn't matter, so anyone can relay, but nobody can forge. |
 | `pqcVerify` at `0x…0a01` | `verifyAttestation` (view) | **Independent re-verification.** Anyone can re-check a stored report's original signature on-chain, using the public key and signature emitted in `ReportPublished`. |
 
@@ -96,4 +131,4 @@ The Foundry tests don't stub `pqcVerify`. `test/utils/PQCOracles.sol` installs a
 Beyond Foundry:
 - `engine/test/live.test.ts` calls the real precompile on Diana.
 - The Attack Lab runs 16 signature attacks against noble, OpenSSL and `pqcVerify`.
-- Two reports are published and independently verified on Diana, 11 of 11 checks each.
+- Four reports are published and independently verified on Diana, 11 of 11 checks each: two on v1 (finding F-1, before and after) and two on v2.
